@@ -1,0 +1,28 @@
+# secrets
+.env
+*.env.local
+!.env.example
+
+# backend
+backend/target/
+backend/uploads/
+
+# frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/next-env.d.ts
+
+# editors / OS
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+
+# Browser tests
+e2e/node_modules/
+e2e/screenshots/
+
+# Test account notes (contain dev passwords)
+docs/TEST-ACCOUNTS.md

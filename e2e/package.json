@@ -1,0 +1,12 @@
+{
+  "name": "recycleconnect-e2e",
+  "private": true,
+  "type": "module",
+  "description": "Browser tests for the whole workflow. Needs the backend on :8080 and the frontend on :3000.",
+  "scripts": {
+    "test": "node full-flow.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "23.11.1"
+  }
+}

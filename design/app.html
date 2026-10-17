@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecycleConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="shared/sorted.css">
+<link rel="stylesheet" href="shared/sorted-more.css">
+<style>
+  /* Full-screen viewer: each screen fills the browser. Phone screens sit in a centred column on wide screens. */
+  html, body { min-height: 100%; }
+  body { margin: 0; background: var(--frame); }
+  .screen[hidden] { display: none !important; }
+  .screen.mobile { min-height: 100vh; }
+  .screen.mobile > .a { width: min(440px, 100%); min-height: 100vh; margin: 0 auto; box-shadow: 0 0 0 1px var(--line), 0 30px 80px -40px rgba(15, 77, 53, .35); }
+  .screen.mobile .screen-wrap { min-height: 100vh; }
+  .screen.desktop > .a { min-height: 100vh; }
+  .screen.desktop .admin { min-height: 100vh; }
+  body.embed .screen.mobile > .a { width: 100%; box-shadow: none; }
+
+  /* Small presenter control, bottom left. Hidden in embed mode or with the H key. */
+  .ctl { position: fixed; left: 16px; bottom: 16px; z-index: 2000; display: flex; align-items: center; gap: 4px; padding: 5px; border-radius: 99px;
+    background: rgba(22, 48, 42, .92); color: #fff; font: 600 13px Figtree, system-ui, sans-serif; box-shadow: 0 10px 30px -10px rgba(0,0,0,.5); backdrop-filter: blur(6px); }
+  .ctl a, .ctl button { font: inherit; color: inherit; background: transparent; border: 0; height: 34px; padding: 0 12px; border-radius: 99px; display: inline-flex; align-items: center; gap: 6px; text-decoration: none; cursor: pointer; white-space: nowrap; }
+  .ctl a:hover, .ctl button:hover { background: rgba(255,255,255,.12); }
+  .ctl :focus-visible { outline: 2px solid #DDF0E6; outline-offset: 1px; }
+  .ctl .name { padding: 0 8px; min-width: 0; }
+  .ctl .name small { color: #BFE0CF; font-weight: 500; margin-right: 6px; }
+  .ctl .jump select { font: inherit; color: #16302A; background: #fff; border: 0; border-radius: 99px; height: 30px; padding: 0 10px; max-width: 170px; }
+  .ctl .jump .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .ctl .sep { width: 1px; height: 20px; background: rgba(255,255,255,.2); margin: 0 2px; }
+  .ctl #track-state { display: inline-flex; gap: 2px; background: rgba(255,255,255,.1); border-radius: 99px; padding: 2px; }
+  .ctl #track-state button { height: 30px; padding: 0 10px; }
+  .ctl #track-state button[aria-pressed="true"] { background: #fff; color: #16302A; }
+  .ctl #track-state[hidden] { display: none; }
+  body.embed .ctl, body.hide-ctl .ctl { display: none; }
+  @media (max-width: 640px) { .ctl { left: 8px; right: 8px; bottom: 84px; justify-content: space-between; } .ctl .name, .ctl .home-l { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <section class="screen mobile" data-screen="login" data-role="Sign in" data-title="Sign in"><div class="a"><div id="login"></div></div></section>
+  <section class="screen mobile" data-screen="reg-customer" data-role="Sign in" data-title="Customer registration"><div class="a"><div id="reg-customer"></div></div></section>
+  <section class="screen mobile" data-screen="reg-collector" data-role="Sign in" data-title="Collector registration"><div class="a"><div id="reg-collector"></div></div></section>
+  <section class="screen mobile" data-screen="c-dash" data-role="Customer" data-title="Dashboard"><div class="a"><div id="c-dash"></div></div></section>
+  <section class="screen mobile" data-screen="c-new" data-role="Customer" data-title="New collection"><div class="a"><div id="c-new"></div></div></section>
+  <section class="screen mobile" data-screen="c-track" data-role="Customer" data-title="Track request"><div class="a"><div id="c-track"></div></div></section>
+  <section class="screen mobile" data-screen="c-requests" data-role="Customer" data-title="My requests"><div class="a"><div id="c-requests"></div></div></section>
+  <section class="screen mobile" data-screen="c-history" data-role="Customer" data-title="History"><div class="a"><div id="c-history"></div></div></section>
+  <section class="screen mobile" data-screen="c-notifs" data-role="Customer" data-title="Notifications"><div class="a"><div id="c-notifs"></div></div></section>
+  <section class="screen mobile" data-screen="c-profile" data-role="Customer" data-title="Profile"><div class="a"><div id="c-profile"></div></div></section>
+  <section class="screen mobile" data-screen="c-complaint" data-role="Customer" data-title="Report an issue"><div class="a"><div id="c-complaint"></div></div></section>
+  <section class="screen mobile" data-screen="k-today" data-role="Collector" data-title="Today’s pickups"><div class="a"><div id="k-today"></div></div></section>
+  <section class="screen mobile" data-screen="k-pickup" data-role="Collector" data-title="Pickup in progress"><div class="a"><div id="k-pickup"></div></div></section>
+  <section class="screen mobile" data-screen="k-assigned" data-role="Collector" data-title="Assigned pickups"><div class="a"><div id="k-assigned"></div></div></section>
+  <section class="screen mobile" data-screen="k-history" data-role="Collector" data-title="History"><div class="a"><div id="k-history"></div></div></section>
+  <section class="screen mobile" data-screen="k-profile" data-role="Collector" data-title="Profile"><div class="a"><div id="k-profile"></div></div></section>
+  <section class="screen desktop" data-screen="a-dash" data-role="Admin" data-title="Dashboard"><div class="a" id="a-dash"></div></section>
+  <section class="screen desktop" data-screen="a-requests" data-role="Admin" data-title="Requests &amp; review"><div class="a" id="a-requests"></div></section>
+  <section class="screen desktop" data-screen="a-customers" data-role="Admin" data-title="Customers"><div class="a" id="a-customers"></div></section>
+  <section class="screen desktop" data-screen="a-collectors" data-role="Admin" data-title="Collectors"><div class="a" id="a-collectors"></div></section>
+  <section class="screen desktop" data-screen="a-categories" data-role="Admin" data-title="Waste categories"><div class="a" id="a-categories"></div></section>
+  <section class="screen desktop" data-screen="a-schedule" data-role="Admin" data-title="Scheduling"><div class="a" id="a-schedule"></div></section>
+  <section class="screen desktop" data-screen="a-complaints" data-role="Admin" data-title="Complaints"><div class="a" id="a-complaints"></div></section>
+  <section class="screen desktop" data-screen="a-analytics" data-role="Admin" data-title="Analytics"><div class="a" id="a-analytics"></div></section>
+  <section class="screen desktop" data-screen="a-reports" data-role="Admin" data-title="Reports"><div class="a" id="a-reports"></div></section>
+  <section class="screen desktop" data-screen="a-audit" data-role="Admin" data-title="Audit log"><div class="a" id="a-audit"></div></section>
+  <section class="screen desktop" data-screen="a-settings" data-role="Admin" data-title="Settings"><div class="a" id="a-settings"></div></section>
+</main>
+
+<nav class="ctl" aria-label="Presentation controls">
+  <a class="home-l" href="presentation.html#screens" title="Back to the overview">Overview</a>
+  <span class="sep"></span>
+  <button type="button" id="prev" aria-label="Previous screen">‹</button>
+  <span class="name" id="name"></span>
+  <label class="jump"><span class="sr">Go to screen</span><select id="jump" aria-label="Go to screen"><optgroup label="Sign in"><option value="login">Sign in</option><option value="reg-customer">Customer registration</option><option value="reg-collector">Collector registration</option></optgroup><optgroup label="Customer"><option value="c-dash">Dashboard</option><option value="c-new">New collection</option><option value="c-track">Track request</option><option value="c-requests">My requests</option><option value="c-history">History</option><option value="c-notifs">Notifications</option><option value="c-profile">Profile</option><option value="c-complaint">Report an issue</option></optgroup><optgroup label="Collector"><option value="k-today">Today’s pickups</option><option value="k-pickup">Pickup in progress</option><option value="k-assigned">Assigned pickups</option><option value="k-history">History</option><option value="k-profile">Profile</option></optgroup><optgroup label="Admin"><option value="a-dash">Dashboard</option><option value="a-requests">Requests &amp; review</option><option value="a-customers">Customers</option><option value="a-collectors">Collectors</option><option value="a-categories">Waste categories</option><option value="a-schedule">Scheduling</option><option value="a-complaints">Complaints</option><option value="a-analytics">Analytics</option><option value="a-reports">Reports</option><option value="a-audit">Audit log</option><option value="a-settings">Settings</option></optgroup></select></label>
+  <button type="button" id="next" aria-label="Next screen">›</button>
+  <span id="track-state" hidden><button type="button" data-state="before" aria-pressed="true">Before pickup</button><button type="button" data-state="after" aria-pressed="false">After pickup</button></span>
+</nav>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="shared/data.js"></script>
+<script src="shared/icons.js"></script>
+<script src="shared/sorted.js"></script>
+<script src="shared/sorted-more.js"></script>
+<script>
+(function () {
+  const screens = Array.from(document.querySelectorAll('.screen'));
+  const ids = screens.map((s) => s.dataset.screen);
+  if (/[?&]embed/.test(location.search)) document.body.classList.add('embed');
+  function show(id) {
+    if (!ids.includes(id)) id = ids[0];
+    let cur;
+    screens.forEach((s) => { s.hidden = s.dataset.screen !== id; if (!s.hidden) cur = s; });
+    document.getElementById('name').innerHTML = '<small>' + cur.dataset.role + '</small>' + cur.dataset.title;
+    document.getElementById('track-state').hidden = id !== 'c-track';
+    document.getElementById('jump').value = id;
+    document.title = cur.dataset.role + ': ' + cur.dataset.title + ' · RecycleConnect';
+    if (location.hash !== '#' + id) history.replaceState(null, '', location.search + '#' + id);
+    window.scrollTo(0, 0);
+    document.dispatchEvent(new CustomEvent('screenshown', { detail: id }));
+  }
+  const step = (d) => { const i = ids.indexOf(location.hash.slice(1)); show(ids[(Math.max(i, 0) + d + ids.length) % ids.length]); };
+  document.getElementById('prev').addEventListener('click', () => step(-1));
+  document.getElementById('next').addEventListener('click', () => step(1));
+  document.getElementById('jump').addEventListener('change', (e) => show(e.target.value));
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest('input, textarea, select')) return;
+    if (e.key === 'ArrowRight') step(1);
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'h' || e.key === 'H') document.body.classList.toggle('hide-ctl');
+  });
+  window.addEventListener('hashchange', () => show(location.hash.slice(1)));
+  // In-app links like href="#c-track" switch screens through hashchange.
+  show(location.hash.slice(1));
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RecycleConnect</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* Layout: a single scrolling story. Problem, then solution, then each screen beside its live preview. Same tokens as the app (design A). */
+:root {
+  --bg: #F4F7F5; --tint: #E8EFEB; --surface: #FFFFFF; --ink: #16302A; --muted: #56685F; --line: #DCE4E0;
+  --leaf: #1E7A55; --leaf-ink: #0F4D35; --leaf-soft: #DCEFE5; --amber: #B7791F; --amber-soft: #FBF0D9; --red: #C2412D;
+  --c-plastic: #2F6FDE; --c-paper: #D9A21B; --c-cardboard: #A0683A; --c-metal: #6B7A86; --c-glass: #159C8F; --c-ewaste: #7A4FD0; --c-batteries: #D9452B; --c-textile: #D6559A;
+  --display: 'Bricolage Grotesque', Figtree, system-ui, sans-serif; --body: Figtree, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.6 var(--body); }
+h1, h2, h3 { font-family: var(--display); letter-spacing: -0.015em; margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: var(--leaf-ink); }
+:focus-visible { outline: 3px solid var(--leaf); outline-offset: 3px; }
+.wrap { width: min(1180px, 100%); margin: 0 auto; padding-inline: 24px; }
+.muted { color: var(--muted); }
+
+/* top bar */
+.top { position: sticky; top: 0; z-index: 10; background: rgba(244, 247, 245, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 20px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; font: 800 19px var(--display); color: var(--leaf-ink); text-decoration: none; }
+.mark { display: grid; grid-template-columns: repeat(3, 6px); gap: 2px; align-items: end; height: 22px; }
+.mark i { display: block; border-radius: 2px 2px 1px 1px; }
+.mark i:nth-child(1) { height: 15px; background: var(--c-plastic); } .mark i:nth-child(2) { height: 22px; background: var(--leaf); } .mark i:nth-child(3) { height: 12px; background: var(--c-paper); }
+.top nav { display: flex; gap: 4px; margin-left: auto; }
+.top nav a { text-decoration: none; color: var(--muted); font-weight: 600; font-size: 15px; padding: 8px 12px; border-radius: 10px; }
+.top nav a:hover { color: var(--ink); background: var(--tint); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 48px; padding: 0 20px; border-radius: 14px; font: 700 16px var(--body); text-decoration: none; white-space: nowrap; }
+.btn-primary { background: var(--leaf); color: #fff; }
+.btn-primary:hover { background: var(--leaf-ink); }
+.btn-ghost { background: var(--surface); color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn-ghost:hover { box-shadow: inset 0 0 0 1.5px #B9C7C0; }
+.btn-sm { height: 40px; padding: 0 16px; font-size: 15px; border-radius: 12px; }
+@media (max-width: 900px) { .top nav { display: none; } .top .btn { margin-left: auto; } }
+
+/* hero */
+.hero { padding-block: 64px 72px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: 56px; align-items: center; }
+.hero h1 { font-size: clamp(38px, 5.2vw, 64px); line-height: 1.02; font-weight: 800; }
+.hero .lead { font-size: 20px; color: var(--muted); margin-top: 22px; max-width: 34em; }
+.hero .cta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+.flow-strip { display: flex; height: 12px; border-radius: 99px; overflow: hidden; gap: 3px; margin-top: 40px; max-width: 520px; }
+.flow-strip i { display: block; }
+.flow-cap { font-size: 14px; color: var(--muted); margin-top: 10px; }
+.device { justify-self: center; width: 360px; max-width: 100%; height: 720px; border-radius: 30px; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 40px 80px -40px rgba(15, 77, 53, .45); }
+.device iframe { width: 100%; height: 100%; border: 0; display: block; }
+@media (max-width: 960px) { .hero .wrap { grid-template-columns: 1fr; } .device { height: 640px; } }
+
+/* sections */
+section.band { padding-block: 72px; }
+section.band.tint { background: var(--tint); }
+.eyebrow { font-weight: 700; font-size: 14px; color: var(--leaf); letter-spacing: .02em; }
+.sec-h { max-width: 760px; }
+.sec-h h2 { font-size: clamp(30px, 3.6vw, 44px); line-height: 1.1; margin-top: 6px; }
+.sec-h p { color: var(--muted); font-size: 18px; margin-top: 14px; }
+
+.pains { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 36px; }
+.pain { background: var(--surface); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 10px; }
+.pain .who { font: 700 19px var(--display); }
+.pain ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15.5px; display: grid; gap: 6px; }
+.pain .bar { height: 6px; border-radius: 99px; }
+@media (max-width: 960px) { .pains { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .pains { grid-template-columns: 1fr; } }
+
+.answer { margin-top: 40px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.answer div { background: var(--leaf-ink); color: #fff; border-radius: 22px; padding: 26px; }
+.answer div:last-child { background: var(--surface); color: var(--ink); }
+.answer h3 { font-size: 22px; }
+.answer p { margin-top: 10px; font-size: 16.5px; }
+.answer div:first-child p { color: #CFE6DA; }
+.answer ul { margin: 12px 0 0; padding-left: 18px; display: grid; gap: 6px; font-size: 16px; }
+@media (max-width: 760px) { .answer { grid-template-columns: 1fr; } }
+
+/* workflow */
+.flow { list-style: none; margin: 40px 0 0; padding: 0; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 10px; counter-reset: s; }
+.flow li { counter-increment: s; background: var(--surface); border-radius: 18px; padding: 16px 14px; position: relative; display: flex; flex-direction: column; gap: 6px; }
+.flow li::before { content: counter(s); width: 30px; height: 30px; border-radius: 50%; background: var(--leaf-soft); color: var(--leaf-ink); font: 800 14px var(--display); display: grid; place-items: center; }
+.flow li b { font-size: 15.5px; line-height: 1.25; }
+.flow li span { font-size: 13.5px; color: var(--muted); line-height: 1.4; }
+.flow li .by { font-size: 12px; font-weight: 700; color: var(--leaf); margin-top: auto; }
+@media (max-width: 1080px) { .flow { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .flow { grid-template-columns: 1fr 1fr; } }
+
+.roles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 36px; }
+.role { background: var(--surface); border-radius: 22px; padding: 24px; }
+.role h3 { font-size: 24px; }
+.role .dev { font-size: 14px; font-weight: 600; color: var(--leaf); margin-top: 2px; }
+.role ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); font-size: 15.5px; display: grid; gap: 6px; }
+@media (max-width: 860px) { .roles { grid-template-columns: 1fr; } }
+
+/* screens */
+.shot { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 56px; align-items: center; padding-block: 56px; border-top: 1px solid var(--line); }
+.shot:first-of-type { border-top: 0; }
+.shot.rev { grid-template-columns: 380px minmax(0, 1fr); }
+.shot.rev .txt { order: 2; }
+.shot .role-tag { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 700; color: var(--leaf-ink); background: var(--leaf-soft); padding: 4px 12px; border-radius: 99px; }
+.shot h3 { font-size: clamp(26px, 3vw, 36px); margin-top: 12px; line-height: 1.1; }
+.solves { margin-top: 16px; padding: 14px 16px; border-radius: 16px; background: var(--amber-soft); color: #5E3D08; font-size: 16px; }
+.solves b { display: block; font-size: 13px; color: #85550C; margin-bottom: 2px; }
+.shot ul { margin: 18px 0 0; padding-left: 20px; display: grid; gap: 7px; font-size: 16px; }
+.shot .open { margin-top: 22px; }
+.shot .device { height: 700px; width: 380px; }
+.shot.wide { grid-template-columns: 1fr; gap: 28px; }
+.shot.wide .txt { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 0 48px; align-items: start; }
+.shot.wide .txt > div:last-child { padding-top: 40px; }
+.desk { width: 100%; border-radius: 18px; overflow: hidden; background: var(--surface); box-shadow: 0 0 0 1px var(--line), 0 40px 80px -48px rgba(15, 77, 53, .5); position: relative; }
+.desk iframe { position: absolute; top: 0; left: 0; width: 1440px; height: 920px; border: 0; transform-origin: 0 0; }
+@media (max-width: 960px) {
+  .shot, .shot.rev { grid-template-columns: 1fr; gap: 28px; }
+  .shot.rev .txt { order: 0; }
+  .shot .device { justify-self: center; }
+  .shot.wide .txt { grid-template-columns: 1fr; }
+  .shot.wide .txt > div:last-child { padding-top: 0; }
+}
+
+.allgrid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin-top: 32px; align-items: start; }
+.allcol { background: var(--surface); border-radius: 20px; padding: 18px; }
+.allcol h3 { font-size: 19px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.allcol h3 small { font: 600 13px var(--body); color: var(--leaf); }
+.allcol ul { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 2px; }
+.allcol a { display: block; padding: 9px 10px; border-radius: 12px; text-decoration: none; color: var(--ink); }
+.allcol a:hover { background: var(--tint); }
+.allcol b { display: block; font-size: 15px; }
+.allcol span { font-size: 13.5px; color: var(--muted); }
+@media (max-width: 1000px) { .allgrid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px) { .allgrid { grid-template-columns: 1fr; } }
+/* rules + extras */
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 36px; }
+.rule { background: var(--surface); border-radius: 20px; padding: 20px 22px; display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; }
+.rule .ic { width: 44px; height: 44px; border-radius: 14px; background: var(--leaf-soft); color: var(--leaf-ink); display: grid; place-items: center; }
+.rule h3 { font-size: 18px; }
+.rule p { color: var(--muted); font-size: 15.5px; margin-top: 4px; }
+.rule .ref { font-size: 12.5px; font-weight: 700; color: var(--leaf); margin-top: 6px; display: block; }
+.extra .ic { background: var(--amber-soft); color: #85550C; }
+@media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+
+.stack { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 36px; }
+.stack div { background: var(--surface); border-radius: 18px; padding: 18px; }
+.stack b { display: block; font: 700 18px var(--display); }
+.stack span { font-size: 14.5px; color: var(--muted); }
+.stack small { display: block; font-size: 13px; font-weight: 700; color: var(--leaf); margin-bottom: 4px; }
+@media (max-width: 900px) { .stack { grid-template-columns: 1fr 1fr; } }
+
+.road { list-style: none; margin: 36px 0 0; padding: 0; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 10px; }
+.road li { background: var(--surface); border-radius: 16px; padding: 14px; font-size: 15px; font-weight: 600; }
+.road li small { display: block; font-weight: 700; color: var(--muted); font-size: 12.5px; margin-bottom: 4px; }
+@media (max-width: 1000px) { .road { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .road { grid-template-columns: 1fr 1fr; } }
+
+footer { padding-block: 24px; font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="top"><div class="wrap">
+  <a class="brand" href="#top"><span class="mark" aria-hidden="true"><i></i><i></i><i></i></span>RecycleConnect</a>
+  <nav aria-label="Sections"><a href="#problem">Problem</a><a href="#how">How it works</a><a href="#screens">Screens</a><a href="#all">All screens</a><a href="#rules">Rules</a><a href="#tech">Technology</a></nav>
+  <a class="btn btn-primary btn-sm" href="app.html#login">Open the app</a>
+</div></header>
+
+<main id="top">
+  <section class="hero"><div class="wrap">
+    <div>
+      <h1>Recyclables collected on time, weighed fairly and tracked end to end.</h1>
+      <p class="lead">RecycleConnect lets households, shops, offices and institutions book a pickup for their recyclable material. It sends a collector at an agreed time and records what was actually collected, so both sides can see every step from request to completion.</p>
+      <div class="cta"><a class="btn btn-primary" href="#screens">See the screens</a><a class="btn btn-ghost" href="app.html#login">Open full-screen demo</a></div>
+      <div class="flow-strip" aria-hidden="true"><i style="flex:30;background:var(--c-paper)"></i><i style="flex:25;background:var(--c-cardboard)"></i><i style="flex:19;background:var(--c-plastic)"></i><i style="flex:9;background:var(--c-metal)"></i><i style="flex:7;background:var(--c-glass)"></i><i style="flex:4;background:var(--c-ewaste)"></i><i style="flex:4;background:var(--c-textile)"></i><i style="flex:2;background:var(--c-batteries)"></i></div>
+      <p class="flow-cap">Every material has its own colour, the same way bins are colour-coded.</p>
+    </div>
+    <div class="device"><iframe src="app.html?embed#c-dash" title="Customer dashboard preview" loading="lazy"></iframe></div>
+  </div></section>
+
+  <section class="band tint" id="problem"><div class="wrap">
+    <div class="sec-h"><span class="eyebrow">The situation today</span><h2>Recyclables pile up because nobody coordinates the pickup.</h2>
+      <p>In most neighbourhoods, scrap is collected informally. Nobody knows when a collector will come, what they will accept, or how much was really taken. Everyone involved loses something.</p></div>
+    <div class="pains">
+      <div class="pain"><span class="bar" style="background:var(--c-plastic)"></span><span class="who">Households and shops</span><ul><li>No fixed pickup time, so material piles up at home or in the shop</li><li>Unsure what is accepted, especially e-waste and batteries</li><li>No record of what was handed over</li></ul></div>
+      <div class="pain"><span class="bar" style="background:var(--c-paper)"></span><span class="who">Collectors</span><ul><li>Wasted trips: customer not home, wrong address, material gone</li><li>No planned route for the day</li><li>Arguments about weight with nothing to back it up</li></ul></div>
+      <div class="pain"><span class="bar" style="background:var(--c-cardboard)"></span><span class="who">Recycling organisations</span><ul><li>No view of incoming requests or how much material to expect</li><li>Hard to assign collectors fairly across areas</li><li>No reliable reports on collection volume</li></ul></div>
+      <div class="pain"><span class="bar" style="background:var(--c-glass)"></span><span class="who">The city</span><ul><li>Recyclable material ends up in mixed waste and landfill</li><li>Hazardous items like batteries are handled carelessly</li><li>No data to plan where more collection is needed</li></ul></div>
+    </div>
+    <div class="answer">
+      <div><h3>What RecycleConnect does</h3><p>It is a coordination and tracking platform. It does not replace collectors. It gives them, their customers and the organisation running collections one shared, reliable process.</p></div>
+      <div><h3>What it deliberately does not do</h3><ul><li>No AI waste recognition or environmental prediction</li><li>No paid maps, SMS or payment gateway</li><li>No automatic hazardous-material decisions or carbon calculations</li></ul><p class="muted" style="font-size:15px">This keeps the first version free to run and focused on the pickup itself.</p></div>
+    </div>
+  </div></section>
+
+  <section class="band" id="how"><div class="wrap">
+    <div class="sec-h"><span class="eyebrow">How it works</span><h2>One request moves through eight clear steps.</h2>
+      <p>Each step is visible to the people involved, and each change is recorded with who made it and when.</p></div>
+    <ol class="flow">
+      <li><b>List material</b><span>Pick categories and rough quantities</span><span class="by">Customer</span></li>
+      <li><b>Request pickup</b><span>Address on the map, preferred day and time</span><span class="by">Customer</span></li>
+      <li><b>Accept</b><span>Checked against what can be collected</span><span class="by">Admin</span></li>
+      <li><b>Schedule</b><span>A slot inside working hours</span><span class="by">Admin</span></li>
+      <li><b>Pickup</b><span>Collector accepts, travels, arrives</span><span class="by">Collector</span></li>
+      <li><b>Weigh and record</b><span>Actual quantity, with an optional photo</span><span class="by">Collector</span></li>
+      <li><b>Confirm</b><span>Customer agrees or reports an issue</span><span class="by">Customer</span></li>
+      <li><b>Complete</b><span>Saved to history and reports</span><span class="by">System</span></li>
+    </ol>
+    <div class="roles">
+      <div class="role"><h3>Customer</h3><div class="dev">Phone first</div><ul><li>Register as a household, shop, office, institution or business</li><li>Book pickups with several materials at once</li><li>Track status, confirm collection, raise complaints</li><li>See history and total kilograms recycled</li></ul></div>
+      <div class="role"><h3>Collector</h3><div class="dev">Phone, used on the move</div><ul><li>See today’s pickups on a route map</li><li>Accept and update each pickup step by step</li><li>Record actual quantity and a photo</li><li>Mark a failed pickup with a reason</li></ul></div>
+      <div class="role"><h3>Admin</h3><div class="dev">Desktop or tablet</div><ul><li>Review, accept or reject requests</li><li>Schedule and assign the nearest collector</li><li>Manage customers, collectors, categories and complaints</li><li>Analytics, reports with export, and an audit log</li></ul></div>
+    </div>
+  </div></section>
+
+  <section class="band tint" id="screens"><div class="wrap">
+    <div class="sec-h"><span class="eyebrow">The screens</span><h2>Seven key screens, explained.</h2>
+      <p>These are live previews, so you can scroll and tap inside them. “Open full screen” shows the screen across the whole browser, and the arrow keys move between screens.</p></div>
+
+    <article class="shot">
+      <div class="txt"><span class="role-tag">Customer</span><h3>Dashboard</h3>
+        <p class="solves"><b>Solves</b>“When is my pickup, and who is coming?” The answer is the first thing on the screen.</p>
+        <ul><li>Next pickup with date, time slot and the collector’s name</li><li>Small map showing the collector’s route to the home</li><li>One clear button to book a new collection</li><li>Total kilograms recycled, split by material, plus request counts</li><li>Latest updates and recent requests</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#c-dash">Open full screen</a></div>
+      <div class="device"><iframe src="app.html?embed#c-dash" title="Customer dashboard" loading="lazy"></iframe></div>
+    </article>
+
+    <article class="shot rev">
+      <div class="txt"><span class="role-tag">Customer</span><h3>New collection</h3>
+        <p class="solves"><b>Solves</b>Wasted trips and refused material. Customers see what is accepted before they submit, and can only choose times when collectors work.</p>
+        <ul><li>Tap one or more material tiles, then set a rough quantity for each</li><li>What each material includes, with warnings such as “no vehicle batteries”</li><li>A list of items that cannot be collected</li><li>Address with a pin on the map that can be dragged to the gate</li><li>Only working days and hours can be picked (Sunday is closed)</li><li>Notes and photos, plus save as draft</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#c-new">Open full screen</a></div>
+      <div class="device"><iframe src="app.html?embed#c-new" title="New collection" loading="lazy"></iframe></div>
+    </article>
+
+    <article class="shot">
+      <div class="txt"><span class="role-tag">Customer</span><h3>Track request</h3>
+        <p class="solves"><b>Solves</b>Uncertainty and weight disputes. The customer follows each step in plain words and confirms the weighed quantity before the request closes.</p>
+        <ul><li>Route map from the collector to the customer’s address</li><li>Timeline: submitted, accepted, scheduled, collector assigned, pickup started, collected, completed</li><li>Estimated and actual quantity side by side</li><li>Every reschedule shows the old time, new time, reason and who changed it</li><li>Cancel before the cutoff; after pickup, confirm or report an issue</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#c-track">Open full screen</a></div>
+      <div class="device"><iframe src="app.html?embed#c-track" title="Track request" loading="lazy"></iframe></div>
+    </article>
+
+    <article class="shot rev">
+      <div class="txt"><span class="role-tag">Collector</span><h3>Today’s pickups</h3>
+        <p class="solves"><b>Solves</b>Unplanned days. The collector sees every stop in time order on one route map, and knows what to expect at each address.</p>
+        <ul><li>Today’s, pending, completed and failed counts, plus kilograms collected</li><li>Numbered stops on a map in route order</li><li>Each stop shows customer, area, slot, materials and estimated quantity</li><li>New assignments to accept, and filters by date, status and material</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#k-today">Open full screen</a></div>
+      <div class="device"><iframe src="app.html?embed#k-today" title="Collector, today's pickups" loading="lazy"></iframe></div>
+    </article>
+
+    <article class="shot">
+      <div class="txt"><span class="role-tag">Collector</span><h3>Pickup in progress</h3>
+        <p class="solves"><b>Solves</b>Missing records and disputes. The real weight is recorded on the spot next to the customer’s estimate, with an optional photo as evidence.</p>
+        <ul><li>Steps: assigned, accepted, on the way, arrived, collection started, collected, completed</li><li>Map with the pickup point and the collector’s position, plus directions</li><li>Customer’s notes; phone number partly hidden</li><li>Actual quantity and unit for each material, with the difference shown</li><li>“Can’t complete” with a reason: customer away, wrong address, unsafe material…</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#k-pickup">Open full screen</a></div>
+      <div class="device"><iframe src="app.html?embed#k-pickup" title="Collector, pickup in progress" loading="lazy"></iframe></div>
+    </article>
+
+    <article class="shot wide">
+      <div class="txt"><div><span class="role-tag">Admin</span><h3>Dashboard</h3>
+        <p class="solves"><b>Solves</b>No overview. The organisation sees today’s workload, what was collected and where demand is, all on one screen.</p></div>
+        <div><ul><li>Customers, active collectors, pending requests, today’s pickups, completed, failed, total collected</li><li>Material collected by category, and volume by month</li><li>Completed and failed pickups each month</li><li>Map of requests by area, showing how many are waiting for review</li><li>Collector performance and customer activity</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#a-dash">Open full screen</a></div></div>
+      <div class="desk"><iframe src="app.html?embed#a-dash" title="Admin dashboard" loading="lazy" tabindex="-1"></iframe></div>
+    </article>
+
+    <article class="shot wide">
+      <div class="txt"><div><span class="role-tag">Admin</span><h3>Requests and review</h3>
+        <p class="solves"><b>Solves</b>Slow, unfair assignment. The admin reviews each request and picks a collector using a map that shows the zone, each collector’s base and how many pickups they already have that day.</p></div>
+        <div><ul><li>Tabs by status, and filters by material, area, date, collector and quantity</li><li>Accept, ask for more information, reject with a reason, or cancel</li><li>Schedule a date and slot, then assign a collector by zone and load</li><li>Activity log for every request; export to CSV</li></ul>
+        <a class="btn btn-ghost btn-sm open" href="app.html#a-requests">Open full screen</a></div></div>
+      <div class="desk"><iframe src="app.html?embed#a-requests" title="Admin requests and review" loading="lazy" tabindex="-1"></iframe></div>
+    </article>
+  </div></section>
+
+
+  <section class="band" id="all"><div class="wrap">
+    <div class="sec-h"><span class="eyebrow">Every screen</span><h2>27 screens cover the full brief.</h2>
+      <p>Each one opens full screen. Use ‹ › or the arrow keys to move through them, and the menu in the corner to jump.</p></div>
+    <div class="allgrid">
+      <section class="allcol"><h3>Sign in and registration</h3><ul><li><a href="app.html#login"><b>Sign in</b><span>One sign-in for customers, collectors and admins</span></a></li><li><a href="app.html#reg-customer"><b>Customer registration</b><span>Type, contact preference, full address with map pin</span></a></li><li><a href="app.html#reg-collector"><b>Collector registration</b><span>Vehicle, areas, working days, ID proof, admin approval</span></a></li></ul></section>
+      <section class="allcol"><h3>Customer <small>Phone</small></h3><ul><li><a href="app.html#c-dash"><b>Dashboard</b><span>Next pickup, route map, totals, updates</span></a></li><li><a href="app.html#c-new"><b>New collection</b><span>Materials, accepted items, map, date and slot</span></a></li><li><a href="app.html#c-track"><b>Track request</b><span>Timeline, route, estimate vs actual, confirm</span></a></li><li><a href="app.html#c-requests"><b>My requests</b><span>Active, drafts and past requests</span></a></li><li><a href="app.html#c-history"><b>History</b><span>Totals, kilograms by material and month</span></a></li><li><a href="app.html#c-notifs"><b>Notifications</b><span>All 11 kinds of updates, newest first</span></a></li><li><a href="app.html#c-profile"><b>Profile</b><span>Details, addresses, notifications, language</span></a></li><li><a href="app.html#c-complaint"><b>Report an issue</b><span>Pick a pickup, issue type, details, status</span></a></li></ul></section>
+      <section class="allcol"><h3>Collector <small>Phone</small></h3><ul><li><a href="app.html#k-today"><b>Today’s pickups</b><span>Counts, route map, stops in order</span></a></li><li><a href="app.html#k-pickup"><b>Pickup in progress</b><span>Steps, weigh and record, photo, failed reason</span></a></li><li><a href="app.html#k-assigned"><b>Assigned pickups</b><span>New assignments to accept, upcoming days</span></a></li><li><a href="app.html#k-history"><b>History</b><span>Past pickups with actual weights and failures</span></a></li><li><a href="app.html#k-profile"><b>Profile</b><span>Availability, vehicle, areas, offline updates</span></a></li></ul></section>
+      <section class="allcol"><h3>Admin <small>Desktop</small></h3><ul><li><a href="app.html#a-dash"><b>Dashboard</b><span>KPIs, charts, requests-by-area map</span></a></li><li><a href="app.html#a-requests"><b>Requests and review</b><span>Accept, reject, schedule, assign by zone</span></a></li><li><a href="app.html#a-customers"><b>Customers</b><span>Search, filter by type, deactivate</span></a></li><li><a href="app.html#a-collectors"><b>Collectors</b><span>Approve new collectors, load and performance</span></a></li><li><a href="app.html#a-categories"><b>Waste categories</b><span>Turn on or off, warnings, not-accepted list</span></a></li><li><a href="app.html#a-schedule"><b>Scheduling</b><span>Day board by collector and slot, reschedules</span></a></li><li><a href="app.html#a-complaints"><b>Complaints</b><span>Evidence, resolution and reply</span></a></li><li><a href="app.html#a-analytics"><b>Analytics</b><span>Volume by material, failure reasons, busy slots</span></a></li><li><a href="app.html#a-reports"><b>Reports</b><span>Seven report types, CSV and Excel export</span></a></li><li><a href="app.html#a-audit"><b>Audit log</b><span>Who did what and when, can’t be edited</span></a></li><li><a href="app.html#a-settings"><b>Settings</b><span>Hours, slots, cutoff, capacity, notifications, areas</span></a></li></ul></section>
+    </div>
+  </div></section>
+  <section class="band" id="rules"><div class="wrap">
+    <div class="sec-h"><span class="eyebrow">Built-in rules</span><h2>The platform enforces the rules that make collection reliable.</h2></div>
+    <div class="grid2">
+      <div class="rule"><span class="ic" data-i="clock"></span><div><h3>Working hours only</h3><p>Pickups can be scheduled only on working days and inside time slots (Mon–Sat, 08:00–18:00, set by the admin).</p><span class="ref">Validation</span></div></div>
+      <div class="rule"><span class="ic" data-i="scale"></span><div><h3>Both quantities are kept</h3><p>The customer’s estimate and the collector’s actual weight are stored side by side, and the customer confirms the final figure.</p><span class="ref">Quantity confirmation</span></div></div>
+      <div class="rule"><span class="ic" data-i="x"></span><div><h3>Cancellation cutoff</h3><p>Customers can cancel until a set time before pickup. Every cancellation records the reason, the person and the time.</p><span class="ref">Cancellation</span></div></div>
+      <div class="rule"><span class="ic" data-i="alert"></span><div><h3>Failed pickups stay on record</h3><p>A failed pickup needs a reason and remains in history, so repeated problems are easy to spot.</p><span class="ref">Failed pickup</span></div></div>
+      <div class="rule"><span class="ic" data-i="shield"></span><div><h3>Privacy by role</h3><p>Customers see only their own requests. Collectors see only their assigned pickups. Phone numbers are partly hidden.</p><span class="ref">Security and privacy</span></div></div>
+      <div class="rule"><span class="ic" data-i="file"></span><div><h3>Everything is logged</h3><p>Accepting, scheduling, assigning, rescheduling and cancelling are all written to an audit log. Completed requests can’t be edited.</p><span class="ref">Audit log</span></div></div>
+    </div>
+
+    <div class="sec-h" style="margin-top:64px"><span class="eyebrow">Suggested additions</span><h2>Small, free additions that fit how collection works on the ground.</h2>
+      <p>These go beyond the written brief. Each costs nothing to run, and we can include or drop them after your feedback.</p></div>
+    <div class="grid2">
+      <div class="rule extra"><span class="ic" data-i="message"></span><div><h3>Tamil and English</h3><p>A language switch, so customers and collectors can use the app in the language they read most comfortably.</p></div></div>
+      <div class="rule extra"><span class="ic" data-i="bell"></span><div><h3>Free notifications</h3><p>In-app notifications plus optional email, instead of paid SMS. Customers get a reminder the evening before their pickup.</p></div></div>
+      <div class="rule extra"><span class="ic" data-i="truck"></span><div><h3>Works with weak signal</h3><p>The collector app saves step updates and weights on the phone and sends them when the signal returns.</p></div></div>
+      <div class="rule extra"><span class="ic" data-i="pin"></span><div><h3>Zone-based assignment</h3><p>Each collector has a home zone. When scheduling, the nearest collector with free capacity is suggested first.</p></div></div>
+    </div>
+  </div></section>
+
+  <section class="band tint" id="tech"><div class="wrap">
+    <div class="sec-h"><span class="eyebrow">Technology</span><h2>Built only on free and open-source tools.</h2><p>No paid maps, SMS, AI or payment services are needed to run the first version.</p></div>
+    <div class="stack">
+      <div><small>Screens</small><b>React / Next.js</b><span>Responsive web app for phone and desktop</span></div>
+      <div><small>Server</small><b>Java Spring Boot</b><span>Business rules, role-based security, APIs</span></div>
+      <div><small>Database</small><b>PostgreSQL</b><span>Requests, pickups, history and audit log</span></div>
+      <div><small>Maps</small><b>OpenStreetMap</b><span>Free maps with Leaflet</span></div>
+      <div><small>Charts</small><b>Recharts</b><span>Open-source dashboard charts</span></div>
+      <div><small>Sign-in</small><b>Spring Security + JWT</b><span>Free authentication with roles</span></div>
+      <div><small>Photos</small><b>Free-tier storage</b><span>Collection evidence and request photos</span></div>
+      <div><small>Reports</small><b>CSV and Excel export</b><span>Structured files for any spreadsheet tool</span></div>
+    </div>
+    <div class="sec-h" style="margin-top:64px"><span class="eyebrow">After the first version</span><h2>Roadmap</h2></div>
+    <ol class="road">
+      <li><small>Phase 2</small>Collection centre management</li>
+      <li><small>Phase 3</small>Recycling partner management</li>
+      <li><small>Phase 4</small>Customer reward system</li>
+      <li><small>Phase 5</small>Pickup route optimisation</li>
+      <li><small>Phase 6</small>Recycling impact dashboard</li>
+      <li><small>Phase 7</small>Mobile app</li>
+      <li><small>Phase 8</small>Multi-city operations</li>
+    </ol>
+  </div></section>
+
+</main>
+<footer class="wrap">RecycleConnect design proposal. Sample data shown; names and addresses are fictional.</footer>
+
+<script src="shared/data.js"></script>
+<script src="shared/icons.js"></script>
+<script>
+  document.querySelectorAll('[data-i]').forEach((el) => { el.innerHTML = RC.icon(el.dataset.i, 22); });
+  // Scale the 1440px-wide admin previews to fit their containers.
+  const fit = () => document.querySelectorAll('.desk').forEach((d) => {
+    const f = d.querySelector('iframe'), s = d.clientWidth / 1440;
+    f.style.transform = 'scale(' + s + ')';
+    d.style.height = Math.round(920 * s) + 'px';
+  });
+  fit();
+  window.addEventListener('resize', fit);
+</script>
+</body>
+</html>
